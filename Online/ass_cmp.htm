@@ -1,0 +1,1057 @@
+﻿<!doctype html><html><head><meta charset="utf-8" /><style>
+#div b,#div s,#div u,#div i,#div span{display:block;width:32px;height:0px;border:2px solid black;text-decoration:none;position:absolute;font-style:normal;z-index:2;}
+#div b,div u{left:48px;}s,i{left:128px;}
+#div span{border:2px solid black;height:0px;
+-webkit-transform-origin:0%50%;
+-moz-transform-origin:0%50%;
+-ms-transform-origin:0%50%;
+-o-transform-origin:0%50%;
+transform-origin:0%50%;
+z-index:1;}
+#cmptable{cursor:pointer;}
+#cmptable u{background:#f70;}
+h4 p{margin:0;text-indent:10px;}
+</style></head>
+<body>
+<input type="button" onclick="asscmp();" value="Reset" /> <input type="file" id="files" name="file" multiple="multiple" onchange="document.getElementById('filecnt').innerHTML=document.getElementById('files').files.length;" /> <b id="filecnt"></b> <input type="button" onclick="hand();" value=" - Add - " /> <textarea style="vertical-align:middle;width:128px;height:48px;" wrap="off" id="rawass">-</textarea><br>
+Diff:<input id="diff" type="checkbox" onclick="document.getElementById('span').style.display=this.checked?'inline':'none';" /> <span id="span" style="display:none;">Strict:<input id="strict" type="checkbox" /></span>
+<xmp id="filelist"></xmp><input type="button" onclick="func();" value="COMPARE" /> debug:<input id="cdiv" type="checkbox" onclick="document.getElementById('div').style.display=this.checked?'block':'none';" /> 
+
+<div id="div" style="background:silver;width:100%;height:100px;position:relative;font:normal 36px Arial;margin-top:32px;display:none;"></div>
+<div id="outtab"></div><h2 id="title"></h2>
+<br><a href="" id="alink" onclick="document.getElementById('resout').click();">SAVE</a> 
+<textarea id="resout" onclick="this.value=LZString.compressToBase64(JSON.stringify({S:asscmp.S,A:asscmp.A,I:asscmp.I,N:asscmp.N,D:asscmp.D,F:asscmp.F}),true);var  t=this;setTimeout(function(){t.select();},1);document.getElementById('alink').href='data:application/x-download;base64,'+b64e(this.value);"></textarea> <input id="load" type="button" onclick="
+var i=JSON.parse(LZString.decompressFromBase64(document.getElementById('resout').value));asscmp.A=i.A;asscmp.I=i.I;asscmp.N=i.N;document.getElementById('div').outerHTML=asscmp.D=i.D;document.getElementById('outtab').innerHTML=asscmp.S=i.S;asscmp.diff=i.F;tcnt();" value="Load"> <input id="drop" type="file" onchange="var f,r;f=this.files;if(f.length<1)return;r=new FileReader();r.onload=function(e){document.getElementById('resout').value=e.target.result;document.getElementById('load').click();document.getElementById('drop').outerHTML+='';};r.readAsText(f[0]);" />
+<br><hr>
+<h4>
+<p>ass_cmp v1.2, by Kly_Men_COmpany!
+<p>Для изначальной загрузки субтитров в программу, воспользуйтесь интерфейсом сверху:
+<p>Форма открытия файла позволяет выбрать сами файлы субтитров для добавления, она принимает сразу несколько файлов. Также, вы можете вставить содержимое файла субтитров в поле справа от кнопки «Add», но только по одному за раз.
+<p>Чтобы, собственно, принять выбранные файлы или вставленный в поле текст, нажмите «Add». Субтитры попадут в список, где в квадратных скобках показывается количество распознанных реплик в них. Пополнять список можно многократно.
+<p>Запуск основного алгоритма сравнения производится кнопкой «Compare». Целесообразно обрабатывать примерно 2-5 файлов. Вы получите интерактивную таблицу.
+<p>Кнопка «Reset» очищает список загруженных субфайлов, не удаляя таблицу; для полной очистки нажмите «Compare» сразу после.
+<p>Флажок «Debug» включает отображение разбиения реплик линиями. Значения цветов: красный: начала фраз, синий – концы; голубой – файлы, белый – разбиения на блоки по паузам и относительный сдвиг по ним, чёрный – малое смещение; жёлтый – отвергнутые группой разбиения, зелёный – используемые разбиения.
+<p>Работа с таблицей заключается в выборе лидирующей реплики в каждой строке. Один щелчок по ячейке – её выбор, тогда она станет зелёной, а соседние – красными. Для отмены выбора щёлкните её снова, тогда вся строка опять станет жёлтой. Текущее количество лидирующих ячеек для каждого столбца отображается в / … / в заголовке окна и под таблицей.
+<hr>
+<p>Для сохранения текущего состояния, включая саму таблицу, отладочную картину разбиения, и выбранные лидирующие ячейки – воспользуйтесь текстовым полем внизу. Щелчок в него вызовет сохранение всего в строку. Дождитесь выделения текста в поле, и скопируйте его себе.
+<p>Альтернативно, можете просто кликнуть ссылку «Save» левее, и сохранить предложенный файл.
+<p>Для загрузки, вставьте в это же текстовое поле ранее полученную строку и нажмите «Load». Либо – выберите ранее сохранённый файл через форму загрузки правее, дополнительно нажимать уже ничего не нужно.
+<p>Примечания:
+<p>– новые браузеры позволяют перетаскивать файлы сразу на компоненты выбора, вместо принудительного открытия через диалог.
+<p>– при выборе нескольких файлов, последовательность их загрузки может отличаться от ожидаемой; для полного контроля загружайте поштучно.
+<p>– загрузка некорректных файлов, особенно Save/Load, непременно нарушит работу программы…
+<p>– это оффлайновый локальный и статический одностраничный скрипт, все действия происходят в браузере.
+<p>– алгоритм будет работать достаточно долго, когда файлов больше трёх.
+<p>– работают форматы субтитров .ass и ещё какой-то, где можно, к примеру строку «<br>00:21:25,350|00:21:28,486|POP|[SIGHS]<br>». Кстати, такие реплики, заключенные в квадратные скобки – игнорируются алгоритмом, а все символы «¶» и концевые пробелы – удаляются, равно как и пустые строки.
+<hr>
+<p>Особый режим дословного сравнения субтитров:
+<p>Для активации, отметьте флажок «Diff» перед нажатием «Compare». Тогда таблица станет неинтерактивной, однако будет содержать пометки на словах, которые встречаются только в данной ячейке, и ни в одной другой в том же ряду.
+<p>Обрезается всё, кроме английских и русский букв, регистр приводится к верхнему. Каждое слово проверяется на наличие в каждом из оставшихся файлов (хотя обычно, сравнение запускается лишь для двух), и если оно не найдено на той же строке каждого – помечается красным.
+<p>Строки, не содержащие ни одного помеченного слова, закрашиваются зелёным, а остальные – жёлтым. Снятие флажка «Strict» позволяет ослабить проверку, разрешая каждому слову находится не обязательно в той же строке, но и в соседней – на одну раньше или позже.
+<p>Поскольку сравнение не сопоставляет сами слова, то две копии одного повторенного слова могут соответствовать лишь одному в другом файле. Поэтому алгоритм не столько ищёт одинаковые строки, сколько подсвечивает такие слова, которых в другом файле нет.
+<hr></h4>
+
+<script>
+
+// http://pieroxy.net/blog/pages/lz-string/index.html
+// LZ-based compression algorithm, version 1.4.4
+var LZString = (function() {
+var f = String.fromCharCode;
+var keyStrBase64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+var keyStrUriSafe = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-$";
+var baseReverseDic = {};
+function getBaseValue(alphabet, character) {
+if (!baseReverseDic[alphabet]) {
+baseReverseDic[alphabet] = {};
+for (var i=0 ; i<alphabet.length ; i++) {
+baseReverseDic[alphabet][alphabet.charAt(i)] = i;
+}
+}
+return baseReverseDic[alphabet][character];
+}
+var LZString = {
+compressToBase64 : function (input) {
+if (input == null) return "";
+var res = LZString._compress(input, 6, function(a){return keyStrBase64.charAt(a);});
+switch (res.length % 4) {
+default:
+case 0 : return res;
+case 1 : return res+"===";
+case 2 : return res+"==";
+case 3 : return res+"=";
+}
+},
+decompressFromBase64 : function (input) {
+if (input == null) return "";
+if (input == "") return null;
+return LZString._decompress(input.length, 32, function(index) { return getBaseValue(keyStrBase64, input.charAt(index)); });
+},
+compressToUTF16 : function (input) {
+if (input == null) return "";
+return LZString._compress(input, 15, function(a){return f(a+32);}) + " ";
+},
+decompressFromUTF16: function (compressed) {
+if (compressed == null) return "";
+if (compressed == "") return null;
+return LZString._decompress(compressed.length, 16384, function(index) { return compressed.charCodeAt(index) - 32; });
+},
+compressToUint8Array: function (uncompressed) {
+var compressed = LZString.compress(uncompressed);
+var buf=new Uint8Array(compressed.length*2);
+for (var i=0, TotalLen=compressed.length; i<TotalLen; i++) {
+var current_value = compressed.charCodeAt(i);
+buf[i*2] = current_value >>> 8;
+buf[i*2+1] = current_value % 256;
+}
+return buf;
+},
+decompressFromUint8Array:function (compressed) {
+if (compressed===null || compressed===undefined){
+return LZString.decompress(compressed);
+} else {
+var buf=new Array(compressed.length/2);
+for (var i=0, TotalLen=buf.length; i<TotalLen; i++) {
+buf[i]=compressed[i*2]*256+compressed[i*2+1];
+}
+var result = [];
+buf.forEach(function (c) {
+result.push(f(c));
+});
+return LZString.decompress(result.join(''));
+}
+},
+compressToEncodedURIComponent: function (input) {
+if (input == null) return "";
+return LZString._compress(input, 6, function(a){return keyStrUriSafe.charAt(a);});
+},
+decompressFromEncodedURIComponent:function (input) {
+if (input == null) return "";
+if (input == "") return null;
+input = input.replace(/ /g, "+");
+return LZString._decompress(input.length, 32, function(index) { return getBaseValue(keyStrUriSafe, input.charAt(index)); });
+},
+compress: function (uncompressed) {
+return LZString._compress(uncompressed, 16, function(a){return f(a);});
+},
+_compress: function (uncompressed, bitsPerChar, getCharFromInt) {
+if (uncompressed == null) return "";
+var i, value,
+context_dictionary= {},
+context_dictionaryToCreate= {},
+context_c="",
+context_wc="",
+context_w="",
+context_enlargeIn= 2,
+context_dictSize= 3,
+context_numBits= 2,
+context_data=[],
+context_data_val=0,
+context_data_position=0,
+ii;
+for (ii = 0; ii < uncompressed.length; ii += 1) {
+context_c = uncompressed.charAt(ii);
+if (!Object.prototype.hasOwnProperty.call(context_dictionary,context_c)) {
+context_dictionary[context_c] = context_dictSize++;
+context_dictionaryToCreate[context_c] = true;
+}
+context_wc = context_w + context_c;
+if (Object.prototype.hasOwnProperty.call(context_dictionary,context_wc)) {
+context_w = context_wc;
+} else {
+if (Object.prototype.hasOwnProperty.call(context_dictionaryToCreate,context_w)) {
+if (context_w.charCodeAt(0)<256) {
+for (i=0 ; i<context_numBits ; i++) {
+context_data_val = (context_data_val << 1);
+if (context_data_position == bitsPerChar-1) {
+context_data_position = 0;
+context_data.push(getCharFromInt(context_data_val));
+context_data_val = 0;
+} else {
+context_data_position++;
+}
+}
+value = context_w.charCodeAt(0);
+for (i=0 ; i<8 ; i++) {
+context_data_val = (context_data_val << 1) | (value&1);
+if (context_data_position == bitsPerChar-1) {
+context_data_position = 0;
+context_data.push(getCharFromInt(context_data_val));
+context_data_val = 0;
+} else {
+context_data_position++;
+}
+value = value >> 1;
+}
+} else {
+value = 1;
+for (i=0 ; i<context_numBits ; i++) {
+context_data_val = (context_data_val << 1) | value;
+if (context_data_position ==bitsPerChar-1) {
+context_data_position = 0;
+context_data.push(getCharFromInt(context_data_val));
+context_data_val = 0;
+} else {
+context_data_position++;
+}
+value = 0;
+}
+value = context_w.charCodeAt(0);
+for (i=0 ; i<16 ; i++) {
+context_data_val = (context_data_val << 1) | (value&1);
+if (context_data_position == bitsPerChar-1) {
+context_data_position = 0;
+context_data.push(getCharFromInt(context_data_val));
+context_data_val = 0;
+} else {
+context_data_position++;
+}
+value = value >> 1;
+}
+}
+context_enlargeIn--;
+if (context_enlargeIn == 0) {
+context_enlargeIn = Math.pow(2, context_numBits);
+context_numBits++;
+}
+delete context_dictionaryToCreate[context_w];
+} else {
+value = context_dictionary[context_w];
+for (i=0 ; i<context_numBits ; i++) {
+context_data_val = (context_data_val << 1) | (value&1);
+if (context_data_position == bitsPerChar-1) {
+context_data_position = 0;
+context_data.push(getCharFromInt(context_data_val));
+context_data_val = 0;
+} else {
+context_data_position++;
+}
+value = value >> 1;
+}
+}
+context_enlargeIn--;
+if (context_enlargeIn == 0) {
+context_enlargeIn = Math.pow(2, context_numBits);
+context_numBits++;
+}
+context_dictionary[context_wc] = context_dictSize++;
+context_w = String(context_c);
+}
+}
+if (context_w !== "") {
+if (Object.prototype.hasOwnProperty.call(context_dictionaryToCreate,context_w)) {
+if (context_w.charCodeAt(0)<256) {
+for (i=0 ; i<context_numBits ; i++) {
+context_data_val = (context_data_val << 1);
+if (context_data_position == bitsPerChar-1) {
+context_data_position = 0;
+context_data.push(getCharFromInt(context_data_val));
+context_data_val = 0;
+} else {
+context_data_position++;
+}
+}
+value = context_w.charCodeAt(0);
+for (i=0 ; i<8 ; i++) {
+context_data_val = (context_data_val << 1) | (value&1);
+if (context_data_position == bitsPerChar-1) {
+context_data_position = 0;
+context_data.push(getCharFromInt(context_data_val));
+context_data_val = 0;
+} else {
+context_data_position++;
+}
+value = value >> 1;
+}
+} else {
+value = 1;
+for (i=0 ; i<context_numBits ; i++) {
+context_data_val = (context_data_val << 1) | value;
+if (context_data_position == bitsPerChar-1) {
+context_data_position = 0;
+context_data.push(getCharFromInt(context_data_val));
+context_data_val = 0;
+} else {
+context_data_position++;
+}
+value = 0;
+}
+value = context_w.charCodeAt(0);
+for (i=0 ; i<16 ; i++) {
+context_data_val = (context_data_val << 1) | (value&1);
+if (context_data_position == bitsPerChar-1) {
+context_data_position = 0;
+context_data.push(getCharFromInt(context_data_val));
+context_data_val = 0;
+} else {
+context_data_position++;
+}
+value = value >> 1;
+}
+}
+context_enlargeIn--;
+if (context_enlargeIn == 0) {
+context_enlargeIn = Math.pow(2, context_numBits);
+context_numBits++;
+}
+delete context_dictionaryToCreate[context_w];
+} else {
+value = context_dictionary[context_w];
+for (i=0 ; i<context_numBits ; i++) {
+context_data_val = (context_data_val << 1) | (value&1);
+if (context_data_position == bitsPerChar-1) {
+context_data_position = 0;
+context_data.push(getCharFromInt(context_data_val));
+context_data_val = 0;
+} else {
+context_data_position++;
+}
+value = value >> 1;
+}
+}
+context_enlargeIn--;
+if (context_enlargeIn == 0) {
+context_enlargeIn = Math.pow(2, context_numBits);
+context_numBits++;
+}
+}
+value = 2;
+for (i=0 ; i<context_numBits ; i++) {
+context_data_val = (context_data_val << 1) | (value&1);
+if (context_data_position == bitsPerChar-1) {
+context_data_position = 0;
+context_data.push(getCharFromInt(context_data_val));
+context_data_val = 0;
+} else {
+context_data_position++;
+}
+value = value >> 1;
+}
+while (true) {
+context_data_val = (context_data_val << 1);
+if (context_data_position == bitsPerChar-1) {
+context_data.push(getCharFromInt(context_data_val));
+break;
+}
+else context_data_position++;
+}
+return context_data.join('');
+},
+decompress: function (compressed) {
+if (compressed == null) return "";
+if (compressed == "") return null;
+return LZString._decompress(compressed.length, 32768, function(index) { return compressed.charCodeAt(index); });
+},
+_decompress: function (length, resetValue, getNextValue) {
+var dictionary = [],
+next,
+enlargeIn = 4,
+dictSize = 4,
+numBits = 3,
+entry = "",
+result = [],
+i,
+w,
+bits, resb, maxpower, power,
+c,
+data = {val:getNextValue(0), position:resetValue, index:1};
+for (i = 0; i < 3; i += 1) {
+dictionary[i] = i;
+}
+bits = 0;
+maxpower = Math.pow(2,2);
+power=1;
+while (power!=maxpower) {
+resb = data.val & data.position;
+data.position >>= 1;
+if (data.position == 0) {
+data.position = resetValue;
+data.val = getNextValue(data.index++);
+}
+bits |= (resb>0 ? 1 : 0) * power;
+power <<= 1;
+}
+switch (next = bits) {
+case 0:
+bits = 0;
+maxpower = Math.pow(2,8);
+power=1;
+while (power!=maxpower) {
+resb = data.val & data.position;
+data.position >>= 1;
+if (data.position == 0) {
+data.position = resetValue;
+data.val = getNextValue(data.index++);
+}
+bits |= (resb>0 ? 1 : 0) * power;
+power <<= 1;
+}
+c = f(bits);
+break;
+case 1:
+bits = 0;
+maxpower = Math.pow(2,16);
+power=1;
+while (power!=maxpower) {
+resb = data.val & data.position;
+data.position >>= 1;
+if (data.position == 0) {
+data.position = resetValue;
+data.val = getNextValue(data.index++);
+}
+bits |= (resb>0 ? 1 : 0) * power;
+power <<= 1;
+}
+c = f(bits);
+break;
+case 2:
+return "";
+}
+dictionary[3] = c;
+w = c;
+result.push(c);
+while (true) {
+if (data.index > length) {
+return "";
+}
+bits = 0;
+maxpower = Math.pow(2,numBits);
+power=1;
+while (power!=maxpower) {
+resb = data.val & data.position;
+data.position >>= 1;
+if (data.position == 0) {
+data.position = resetValue;
+data.val = getNextValue(data.index++);
+}
+bits |= (resb>0 ? 1 : 0) * power;
+power <<= 1;
+}
+switch (c = bits) {
+case 0:
+bits = 0;
+maxpower = Math.pow(2,8);
+power=1;
+while (power!=maxpower) {
+resb = data.val & data.position;
+data.position >>= 1;
+if (data.position == 0) {
+data.position = resetValue;
+data.val = getNextValue(data.index++);
+}
+bits |= (resb>0 ? 1 : 0) * power;
+power <<= 1;
+}
+dictionary[dictSize++] = f(bits);
+c = dictSize-1;
+enlargeIn--;
+break;
+case 1:
+bits = 0;
+maxpower = Math.pow(2,16);
+power=1;
+while (power!=maxpower) {
+resb = data.val & data.position;
+data.position >>= 1;
+if (data.position == 0) {
+data.position = resetValue;
+data.val = getNextValue(data.index++);
+}
+bits |= (resb>0 ? 1 : 0) * power;
+power <<= 1;
+}
+dictionary[dictSize++] = f(bits);
+c = dictSize-1;
+enlargeIn--;
+break;
+case 2:
+return result.join('');
+}
+if (enlargeIn == 0) {
+enlargeIn = Math.pow(2, numBits);
+numBits++;
+}
+if (dictionary[c]) {
+entry = dictionary[c];
+} else {
+if (c === dictSize) {
+entry = w + w.charAt(0);
+} else {
+return null;
+}
+}
+result.push(entry);
+dictionary[dictSize++] = w + entry.charAt(0);
+enlargeIn--;
+w = entry;
+if (enlargeIn == 0) {
+enlargeIn = Math.pow(2, numBits);
+numBits++;
+}
+}
+}
+};
+return LZString;
+})();
+if (typeof define === 'function' && define.amd) {
+define(function () { return LZString; });
+} else if( typeof module !== 'undefined' && module != null ) {
+module.exports = LZString
+} else if( typeof angular !== 'undefined' && angular != null ) {
+angular.module('LZString', [])
+.factory('LZString', function () {
+return LZString;
+});
+}
+
+
+function RT(r){
+return '-webkit-transform:rotate('+r+'deg);-moz-transform:rotate('+r+'deg);-ms-transform:rotate('+r+'deg);-o-transform: rotate('+r+'deg);';
+}
+function T(x1,y1,x2,y2,c,z){
+x2-=x1;y2-=y1;
+return '<span style="'+RT(180/Math.PI*(Math.atan2(y2,x2)))+'width:'+Math.sqrt(x2*x2+y2*y2)+'px;left:'+x1+'px;top:'+y1+'px;border-color:'+c+';z-index:'+(100-z)+';'+'"></span>'; 
+}
+
+function func(){
+asscmp.diff=document.getElementById('diff').checked;
+asscmp.strict=document.getElementById('strict').checked;
+
+F=asscmp.arr.concat();
+g=[];
+n=0;
+
+div=document.getElementById('div');
+m=0;v=0;
+
+b=4;
+b=64;
+
+n=0;
+while(F[n]&&F[n].length>1){
+F[n][F[n].length]={b:F[n][F[n].length-1].e+1,e:F[n][F[n].length-1].e+2,t:' '};
+n++;
+}
+
+for(h=0;h<n;h++){
+for(i=0;i<F[h].length;i++){
+if(asscmp.diff)F[h][i].t=F[h][i].d;
+if(F[h][i].b>F[h][i].e){
+t=F[h][i].b;
+F[h][i].b=F[h][i].e;
+F[h][i].e=t;}}
+
+F[h].sort(function(x,y){return x.b-y.b;});
+
+for(i=j=0;i<F[h].length;i++,j++){
+F[h][j]=F[h][i];
+if(i==F[h].length-1)break;
+
+if(F[h][i+1].b<F[h][i].e){
+if(F[h][i+1].e<F[h][i].e){
+v=F[h][i].e;
+w=F[h][i+1].e;
+if(v<w)v=w;
+F[h][i+1].e=v;
+F[h][i+1].b=F[h][i].b;
+F[h][i+1].t=F[h][i].t+(asscmp.diff?' ':'<br>')+F[h][i+1].t;
+j--;
+}else{
+w=Math.round((F[h][i+1].b+F[h][i].e)/2);
+F[h][i+1].b=w;
+F[h][i].e=w;
+}
+}
+}
+F[h].length=j;
+}
+
+for(h=0;h<n;h++){
+d=100-F[h][0].b;
+for(i=0;i<F[h].length;i++){
+F[h][i].b+=d;
+F[h][i].e+=d;
+}
+}
+
+x=64;
+y=32;
+X=x+y/2;
+Y=x+y;
+p512=n*Y+x*2;
+
+L=5;
+
+lag=L;
+
+G=0;
+for(G=0;G<2;G++){
+lag-=L;
+k=1;
+while(k){
+k=0;
+lag+=L;
+s='';
+
+f=[];I=[];
+for(h=0;h<n;h++){
+f[h]=[];
+for(i=0;i<F[h].length;i++){
+f[h][i]={b:F[h][i].b,e:F[h][i].e,s:F[h][i].s,t:F[h][i].t};
+}
+I[h]=0;
+}
+
+while(1){
+
+J=[];E=[];
+for(h=0;h<n;h++){
+J[h]=0;
+E[h]=-1;
+for(i=I[h];i<f[h].length-2;i++)if(f[h][E[h]=i+1].b-f[h][i].e>=lag){J[h]=1;break;}
+}
+d=1;j=1;
+for(h=0;h<n;h++){if(E[h]>-1)d=0;if(J[h])j=0;}
+if(d||j)break;
+
+m=-1;
+for(h=0;h<n;h++)if(J[h]){
+v=f[h][E[h]].b;
+if(v<m||m==-1)m=v;
+}
+
+for(h=0;h<n;h++)if(E[h]>-1){
+for(i=I[j];i<f[h].length-1;i++)if(f[h][i].b<=m&&f[h][i+1].b>=m){E[h]=i;break;}
+if(f[h][E[h]+1].b-m<m-f[h][E[h]].b)E[h]=E[h]+1;
+}
+
+m=0;
+for(h=0;h<n;h++)if(E[h]>-1){
+v=f[h][E[h]].b;
+if(v>m)m=v;
+}
+
+R=[];e=[];
+for(r=0;r<n;r++){
+R[r]=0;
+e[r]=-1;
+}
+
+if(G){
+
+v=-1;
+for(r=0;r<n;r++)if(E[r]>-1)if(v==-1||f[r][E[r]-1].e<v)v=f[r][E[r]-1].e;
+
+for(r=0;r<n;r++)if(E[r]>-1)for(i=I[r];i<E[r];i++)if(f[r][i].b<v)e[r]=i;else break;
+
+while(1){
+
+M=[];
+for(r=n;r>=0;r--){
+M[r]=0;
+if(r<n){
+for(i=I[r];i<e[r];i++){
+f[r][i].b++;
+f[r][i].e++;
+}
+}
+for(h=0;h<n;h++)if(E[h]>-1){
+for(i=I[h];i<e[h];i++){
+vb=f[h][i].b;
+ve=f[h][i].e;
+for(H=0;H<n;H++)if(E[H]>-1&&H!=h){
+d=-1;
+for(j=I[H];j<e[H];j++){
+v=vb-f[H][j].b;if(v<0)v=-v;
+if(d>-1&&v>d)break;
+d=v;
+}
+M[r]+=d;
+d=-1;
+for(j=I[H];j<e[H];j++){
+v=ve-f[H][j].e;if(v<0)v=-v;
+if(d>-1&&v>d)break;
+d=v;
+}
+M[r]+=d;
+}}
+}
+
+if(r<n){
+for(i=I[r];i<e[r];i++){
+f[r][i].b--;
+f[r][i].e--;
+}
+}
+
+}
+
+v=M[n];V=n;
+for(r=0;r<n;r++)if(M[r]<v)v=M[V=r];
+if(V==n)break;
+
+R[V]++;
+for(i=I[V];i<E[V];i++){
+f[V][i].b++;
+f[V][i].e++;
+}
+
+}
+
+}
+
+v=0;
+if(G)s+=T(0,m/b,p512,m/b,'white',10);
+for(h=0;h<n;h++)if(E[h]>-1){d=m-f[h][E[h]].b;if(d>v)v=d;
+
+for(i=E[h];i<f[h].length;i++){f[h][i].b+=d;f[h][i].e+=d;}
+if(G){
+
+s+=T(X+Y*h,m/b,X+Y*h,(m-d)/b,'white',2);
+s+=T(X+Y*h,f[h][I[h]].b/b,X+Y*h,(f[h][I[h]].b-R[h])/b,'black',0);
+}
+I[h]=E[h];
+}
+
+if(v>lag){k=1;break;}
+
+for(h=0;h<n;h++)if(E[h]>-1){
+f[h][E[h]].p=[];
+for(H=0;H<n;H++)if(E[H]>-1){f[h][E[h]].p[H]=E[H];
+}}
+
+}
+}
+
+m=0;
+for(h=0;h<n;h++)for(i=0;i<f[h].length;i++){
+vb=f[h][i].b/b;
+ve=f[h][i].e/b;
+if(m<ve)m=ve;
+if(m<vb)m=vb;
+//s+=T(X+Y*h,vb,Y+Y*h,vb,'red',4)+T(x+Y*h,ve,X+Y*h,ve,'blue',4)+T(X+Y*h,vb,X+Y*h,ve-4,'cyan',4);
+s+=T(x+Y*h,vb,X+Y*h,vb,'red',4)+T(X+Y*h,ve,Y+Y*h,ve,'blue',5)+T(X+Y*h,vb,X+Y*h,ve-4,'cyan',4);
+}
+
+div.style.height=(m+256)+'px';
+
+m=[];
+for(h=0;h<n;h++){
+m[h]=[];
+for(i=0;i<f[h].length;i++){
+if(i>0)if(f[h][i]<f[h][i-1])console.log(f[h][i],f[h][i-1]);
+m[h][i]=[];
+for(H=0;H<n;H++)m[h][i][H]={b:-1,e:-1};
+}
+}
+
+for(c in {b:'',e:''}){
+for(h=0;h<n;h++){
+
+for(i=0;i<f[h].length;i++){V=f[h][i][c];
+m[h][i][h][c]=i;
+for(H=0;H<n;H++)
+{
+d=-1;uu=-1;
+for(j=0;j<f[H].length;j++){
+v=V-f[H][j][c];if(v<0)v=-v;
+if(d==-1||v<d){d=v;uu=j;}
+}
+if(false)for(j=0;j<f[H].length;j++){
+v=V-f[H][j][c];if(v<0)v=-v;
+if(d>-1&&v>d)break;
+d=v;
+
+uu=j;
+}
+
+m[h][i][H][c]=uu;
+
+}}
+}
+
+}
+
+for(h=0;h<n;h++){
+f[h][0].p=[];
+for(H=0;H<n;H++){f[h][0].p[H]=0;
+}}
+
+for(h=0;h<n;h++)
+for(i=f[h].length-1;i>=0;i--){
+
+if(i>0)M=f[h][i-1].e;
+if(f[h][i].p&&f[h][i].p[h]>-1){
+for(j=n-1;j>=0;j--)if(f[h][i].p[j]>-1){
+//s+=T(X+Y*h,f[h][i].b/b,X+Y*j,f[j][f[h][i].p[j]].b/b,'orange',6);
+if(i>0&&f[h][i].p[j]>0&&f[j][f[h][i].p[j]-1].e<M)M=f[j][f[h][i].p[j]-1].e;
+}
+//if(i>0&&h==0)s+=T(0,M/b,p512,M/b,'black',6);
+}
+}
+
+II=0;
+for(h=0;h<n;h++)
+for(i=f[h].length-1;i>=0;i--){
+
+for(c in {b:'',e:''}){
+M=[];
+for(H=0;H<n;H++)
+if(m[H][m[h][i][H][c]][h][c]==i)
+M.push({h:H,i:m[h][i][H][c]});
+g=true;
+for(j=0;j<M.length;j++)
+for(J=j+1;J<M.length;J++)
+if(!(m[M[J].h][M[J].i][M[j].h][c]==M[j].i&&m[M[j].h][M[j].i][M[J].h][c]==M[J].i))g=false;
+
+if(g){
+II++;
+for(j=0;j<M.length;j++)
+for(J=j+1;J<M.length;J++)
+if(M.length==n){
+s+=T(X+Y*M[j].h,f[M[j].h][M[j].i][c]/b,X+Y*M[J].h,f[M[J].h][M[J].i][c]/b,'lime',8);
+f[M[j].h][M[j].i][c+'_']=II;
+f[M[J].h][M[J].i][c+'_']=II;
+}else s+=T(X+Y*M[j].h,f[M[j].h][M[j].i][c]/b,X+Y*M[J].h,f[M[J].h][M[J].i][c]/b,'yellow',8);
+}
+
+}}
+
+}
+
+for(h=0;h<n;h++){
+F[h]=[];
+j=0;
+for(i=0;i<f[h].length;i++){
+F[h][j++]={p:f[h][i].b_,t:f[h][i].t+(asscmp.diff?' ':'<br>')};
+F[h][j++]={p:f[h][i].e_,t:''};
+}
+}
+
+S='<table border="1" id="cmptable">';
+i=0;
+a=[];
+b=[];
+for(h=0;h<n;h++){
+a[h]=0;
+b[h]='';
+}
+
+d=true;
+while(d){
+d=false;
+for(h=0;h<n;h++)while(a[h]<F[h].length){
+d=true;
+if(F[h][a[h]].p>0)break;
+b[h]+=F[h][a[h]].t;
+a[h]++;
+}
+H=false;
+for(h=0;h<n;h++)if(b[h]!=''){H=true;break;}
+if(H)S+='<tr>';
+for(h=0;h<n;h++){
+if(H)S+='<td id="t_'+i+'_'+h+'">'+b[h]+'</td>';
+if(a[h]<F[h].length)b[h]=F[h][a[h]].t;
+else b[h]='';
+a[h]++;
+}
+if(H){S+='</tr>';i++;}
+}
+S+='</table>';
+
+div.innerHTML=s;
+
+asscmp.D=div.outerHTML;
+asscmp.S=S;
+asscmp.I=I=i;
+asscmp.N=N=n;
+asscmp.A=A=[];
+document.getElementById('outtab').innerHTML=S;
+
+D=function(i,j){return document.getElementById('t_'+i+'_'+j);}
+for(i=0;i<I;i++){
+A[i]=[];
+F=false;
+for(j=0;j<N;j++){
+if(asscmp.diff){
+A[i][j]='';
+W=D(i,j).innerHTML.split(' ');
+for(w=0;w<W.length;w++)if(W[w]!=''){
+v=' '+W[w]+' ';
+f=false;
+for(k=0;k<N;k++)if(k!=j){
+if((' '+D(i,k).innerHTML+' ').indexOf(v)<0){
+if(!asscmp.strict){
+if(i>0&&(' '+D(i-1,k).innerHTML+' ').indexOf(v)>=0)continue;
+if(i<I-1&&(' '+D(i+1,k).innerHTML+' ').indexOf(v)>=0)continue;
+}
+f=true;break;}
+}
+if(f){
+A[i][j]+='<u>'+W[w]+'</u> ';
+F=true;
+}else{
+A[i][j]+=W[w]+' ';
+}
+}
+}else{
+D(i,j).style.backgroundColor='yellow';
+A[i][j]=0;
+}
+
+}
+
+if(asscmp.diff)for(j=0;j<N;j++){
+D(i,j).innerHTML=A[i][j];
+D(i,j).style.backgroundColor=F?'yellow':'lime';
+A[i][j]=0;
+}
+}
+
+asscmp.F=false;
+if(asscmp.diff){
+asscmp.S=document.getElementById('outtab').outerHTML;
+asscmp.F=true;
+}
+tcnt();
+
+}
+
+document.getElementById('outtab').addEventListener('click',function(e){
+I=asscmp.I;
+N=asscmp.N;
+A=asscmp.A;
+e=e.target;
+while(!e.id)e=e.parentNode;
+if(e.id=='cmptable'||e.id=='outtab')return;
+e=e.id.substring(2).split('_');
+var i=e[0],j=e[1],k,p;
+if(A[i][j]==1){
+A[i][j]=0;
+}else{
+for(k=0;k<N;k++)A[i][k]=0;
+A[i][j]=1;
+}
+tcnt();
+},false);
+
+
+function tcnt(){
+if(asscmp.diff){document.title=document.getElementById('title').innerHTML=' / ';return;}
+var i,j,k,I,J,N,s,p;
+I=asscmp.I;
+N=asscmp.N;
+A=asscmp.A;
+for(i=0;i<I;i++){
+p=false;
+for(k=0;k<N;k++)if(A[i][k]){p=true;break;}
+for(k=0;k<N;k++)document.getElementById('t_'+i+'_'+k).style.backgroundColor=
+A[i][k]?'lime':(p?'#f70':'yellow');
+}
+
+r=[];
+for(j=0;j<N;j++){
+r[j]=0;
+for(i=0;i<I;i++)r[j]+=A[i][j];
+}
+s=' / ';
+for(j=0;j<N;j++)s+=r[j]+' / ';
+document.title=document.getElementById('title').innerHTML=s;
+}
+
+function gettime(s,d){
+d=d?1:10;
+s=s.replace('.',':').replace(',',':').split(':');
+s=((+s[0])*1000*60*60)+((+s[1])*1000*60)+((+s[2])*1000)+((+s[3])*d);
+return s;
+}
+
+function parse(ass){
+var p,n,i,j,d,s,k,t,v,h,l,c,w,o,z,V;
+d=ass.split('\n');
+w=[];
+h='';
+for(j=0;j<d.length;j++){
+s=d[j].split(',');
+if(s.length<9)continue;
+if(s[0].substring(0,9)=='Dialogue:'){
+t=gettime(s[1]);
+x=gettime(s[2]);
+k=s[3];
+v='';l=9;
+while(typeof(s[l])=='string')v+=s[l++]+',';
+v=v.substring(0,v.length-1).replace(/\\N/g,' \\N<br>');
+V='<i>'+k+'</i>: '+'<b>'+v+'</b>';
+v=' '+v.toUpperCase().replace(/[Ё]/g,'Е').replace(/[^A-ZА-Я ]/g,'').trim()+' ';
+w.push({b:t,e:x,t:V,d:v});
+}}
+if(w.length==0){
+d=ass.split('\n');
+w=[];
+h='';
+for(j=0;j<d.length;j++){
+s=d[j].split('|');
+if(s.length<3)continue;
+t=gettime(s[0],true);
+x=gettime(s[1],true);
+k=s[2];
+v='';l=3;
+while(typeof(s[l])=='string')v+=s[l++]+',';
+v=v.substring(0,v.length-1).replace(/¶/g,'').trim();
+if(!(v==''||v.charAt(0)=='['&&v.charAt(v.length-1)==']')){
+V='<i>'+k+'</i>: '+'<b>'+v+'</b>';
+v=' '+v.toUpperCase().replace(/[Ё]/g,'Е').replace(/[^A-ZА-Я ]/g,'').trim()+' ';
+w.push({b:t,e:x,t:V,d:v});
+}
+}
+}
+return w;
+}
+
+function hand(){
+var f,i,r,t;
+i=0;
+t=parse(document.getElementById('rawass').value);
+if(t.length>0){
+asscmp.arr.push(t);
+document.getElementById('filelist').innerHTML+='['+t.length+']\n';
+}
+document.getElementById('rawass').value='';
+document.getElementById('filecnt').innerHTML='0';
+f=document.getElementById('files').files;
+if(f.length<1)return;
+r=new FileReader();
+r.onload=function(e){
+t=parse(e.target.result);
+if(t.length>0){
+asscmp.arr.push(t);
+document.getElementById('filelist').innerHTML+='['+t.length+'] '+f[i].name+'\n';
+}
+i++;
+if(i==f.length){
+document.getElementById('files').outerHTML+='';
+return;
+}else r.readAsText(f[i]);
+};
+r.readAsText(f[i]);
+
+}
+
+function asscmp(){
+asscmp.arr=[];
+document.getElementById('files').outerHTML+='';
+document.getElementById('filelist').innerHTML='';
+document.getElementById('filecnt').innerHTML='0';
+document.getElementById('rawass').value='';
+document.getElementById('resout').value='';
+document.getElementById('cdiv').checked=false;
+document.getElementById('diff').checked=false;
+document.getElementById('strict').checked=true;
+
+}
+
+function b64e(t,n){var r='',m=0,c1,c2,c3,e1,e2,e3,e4,k='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=',i=0;t=unescape(encodeURIComponent(t));while(i<t.length){c1=t.charCodeAt(i++);c2=t.charCodeAt(i++);c3=t.charCodeAt(i++);e1=(c1&255)>>2;e2=((c1&3)<<4)|((c2&255)>>4);e3=((c2&15)<<2)|((c3&255)>>6);e4=c3&63;if(isNaN(c2)){e3=e4=64;}else if(isNaN(c3)){e4=64;}r+=k.charAt(e1)+k.charAt(e2)+k.charAt(e3)+k.charAt(e4);if(n&&++m==16){m=0;r+='\n'}}return r+'\n';}
+function b64d(t){var k='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=',r='',c1,c2,c3,e1,e2,e3,e4,i=0;t=t.replace(/[^A-Za-z0-9\+\/\=]/g,'');while(i<t.length){e1=k.indexOf(t.charAt(i++));e2=k.indexOf(t.charAt(i++));e3=k.indexOf(t.charAt(i++));e4=k.indexOf(t.charAt(i++));c1=(e1<<2)|(e2>>4);c2=((e2&15)<<4)|(e3>>2);c3=((e3&3)<<6)|e4; r+=String.fromCharCode(c1);if(e3!=64)r+=String.fromCharCode(c2);if(e4!=64)r+=String.fromCharCode(c3);}return decodeURIComponent(escape(r));}
+
+asscmp();func();</script>
+
+</div></body></html>

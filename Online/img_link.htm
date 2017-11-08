@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+<head>
+<meta charset=utf-8>
+<title>imglink</title>
+<style>*{margin:5px;padding:5px;color:black;}a,i{margin:0;padding:0}</style>
+</head>
+<body>
+<script>
+function Func(u,a){
+u=document.getElementById('url').value;
+a=u.match(/imgurl=(.*?)&/);
+if(a)u=decodeURIComponent(a[1]);
+a=u.match(/\/([^\/]+?\.[^\/]+)$/);
+if(a)a=a[1];else a='';
+document.getElementById('xmp').innerHTML=a;
+document.getElementById('url').value=u;
+return true;
+};
+setTimeout(function(f){
+document.body.innerHTML='<form id=form onsubmit="return Func();" method=GET action="https://images.duckduckgo.com/iu/" target=_blank><input id=url name=u type=text onclick=this.select(); size=32><input type=hidden name=f value=1><input type=submit value=ok></form><xmp id=xmp></xmp><b><br>img_link v1.1 by Kly_Men_COmpany!<br><br>Paste any direct image URL there. It will be proxified via DuckDuckGo.<br><br>Also you can navigate to <a target=_blank href="https://www.google.com/search?tbm=isch&q=images">Google Image Search</a> and copy any <i>/imgres?imgurl=...</i> preview link.</b>';
+},10);
+</script>
+</body>
+</html>
+
+
+
+
+

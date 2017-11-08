@@ -1,0 +1,104 @@
+﻿<html><head><meta charset="utf-8"></head><body><script>
+
+document.writeln('<p>mlp_parser v1.1 by Kly_Men_COmpany!</p><h4 style="font:bold 14px Courier New,monospace;">Пример: "И [тогда|затем|после этого] [она|пони] сразу [решила [пойти|поскакать]|побежала] домой."<br>Или круглые скобки: "(один/два/три)"; экранирование дублированием: "(( // ))"</h4><input type="text" style="width:98%" id="input" onkeyup="main();"><br><input type="button" onclick="mainall();" value=" OK "><br><br><table id="table"></table><xmp id="xmp"></xmp>');
+function main(){
+var i,r='',s=(document.getElementById('input').value+'').trim();
+r='';
+for(i=0;i<20;i++)r+=render(s)+'\n';
+r+='\n__________\n';
+document.getElementById('xmp').innerHTML=r;
+document.getElementById('table').innerHTML='';
+return s;
+}
+function mainall(){
+document.getElementById('table').innerHTML=renderall(main());
+}
+
+function render(s){
+return render.loop(render.prep(s),0,0);
+}
+function renderall(s){
+s=render.prep(s);
+randar.clear();
+render.loop(s,0,1);
+var r=[],t=[],c=[],j,k,v;
+for(i=0;i<randar.cycle;i++)r[i]=render.loop(s,0,2);
+
+k=0;
+for(i=0;i<randar.cycle;i++){
+v=r[i];
+if(v===false)continue;
+t[k]=v;
+c[k]=1;
+for(j=i+1;j<randar.cycle;j++)if(r[j]==v){
+c[k]++;
+r[j]=false;
+}
+k++;
+}
+r='';
+for(i=0;i<k;i++)
+r+='<tr><td> &nbsp; &nbsp; "'+t[i]+'" &nbsp; &nbsp; </td><td> &nbsp; &nbsp; '+c[i]+'/'+k+' &nbsp; &nbsp; </td><td> &nbsp; &nbsp; '+(c[i]/k*100).toFixed(2)+'% &nbsp; &nbsp; </td></tr>';
+return r;
+}
+render.prep=function(s){
+s=s.replace(/\(\(/g,'\0').replace(/\(/g,'[').replace(/\0/g,'(');
+s=s.replace(/\)\)/g,'\0').replace(/\)/g,']').replace(/\0/g,')');
+s=s.replace(/\/\//g,'\0').replace(/\//g,'|').replace(/\0/g,'/');
+return s;
+}
+render.loop=function(s,t,n){
+var i,j,r;t=(t!==1);
+if(t)s+='\0';
+while(1){
+i=s.indexOf('[');
+if(i<0)break;
+r=s.substring(i+1);
+s=s.substring(0,i);
+i=r.indexOf('[');
+j=r.indexOf(']');
+if(j<0)break;
+if(i>=0&&j>i)s+='['+render.loop(r,1,n);
+else s+=randar(r.substring(0,j).split('|'),n)+r.substring(j+1);
+}
+if(t&&(s.indexOf('[')>=0||s.indexOf('|')>=0||s.indexOf(']')>=0||s.indexOf('\0')!=s.length-1)){
+return 'ERROR';
+}
+return(t?s=s.substring(0,s.length-1):s);
+}
+
+function randar(a,t){
+if(t===1){
+randar.sizes[randar.count]=a.length;
+randar.array[randar.count]=0;
+randar.count+=1;
+randar.cycle*=a.length;
+}else if(t===2){
+if(randar.index==randar.count){
+randar.index=0;
+t=0;
+while(t<randar.count){
+randar.array[t]+=1;
+if(randar.array[t]==randar.sizes[t]){
+randar.array[t]=0;
+t+=1;
+continue;
+}
+break;
+}
+}
+t=randar.array[randar.index];
+randar.index+=1;
+return a[t];
+}
+return a[Math.round(Math.random()*(a.length-1))];
+}
+randar.clear=function(){
+randar.sizes=[];
+randar.array=[];
+randar.count=0;
+randar.cycle=1;
+randar.index=0;
+}
+
+</script></body></head>

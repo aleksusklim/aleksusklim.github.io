@@ -1,0 +1,116 @@
+﻿<!doctype html><head><title>Случаные ударения v1.2!</title><meta charset="utf-8"></head>
+<script src="rand_ojegov.js"></script>
+<body>
+
+<div style="margin:20px;">
+О: <input type="text" size="3" value="о" id="_o" onkeyup="F();"> &nbsp; &nbsp; Х: <input type="text" size="3" value="х" id="_x" onkeyup="F();"> &nbsp; &nbsp; <b>rand_ojegov v1.2, by Kly_Men_COmpany!</b>
+<br><br>
+<textarea type="text" id="line" style="height:6em;width:100%;font:bold 14pt Courier New" onkeyup="F();" onclick="F();"></textarea>
+</div>
+<div id="out" style="margin:20px;font:14pt Arial;">
+
+</div>
+<style>
+#out s{font-style:italic;}
+#out u{font-weight:bold;}
+</style>
+
+<script>
+function escapeRegExp(str){return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g,"\\$&");}
+function htmlEntities(str){return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function F(){
+var v,O,X,i,s,c,g,n,y;
+O=(document.getElementById('_o').value+'о').trim().charAt(0).toUpperCase();document.getElementById('_o').value=O;
+X=(document.getElementById('_x').value+'х').trim().charAt(0).toUpperCase();document.getElementById('_x').value=X;
+v=document.getElementById('line').value.trim();
+s='';
+if(v!==''){
+
+v=htmlEntities(v);
+v=v.replace(new RegExp('('+escapeRegExp(O)+'|'+escapeRegExp(X)+')+','gi'),function(p){
+
+c=p.toUpperCase();
+if(c.match(new RegExp('^'+O+'*'+X+'+'+O+'*$|^'+X+'*'+O+'+'+X+'*$'))){
+c=c.replace(new RegExp(O,'g'),'O').replace(new RegExp(X,'g'),'X');
+n=(c=='O');
+if(n)c='X';
+y=c;
+g=window.G[c];
+if(g){
+c=g[Math.floor(Math.random()*g.length)].toLowerCase();
+c=c.replace(/`./,function(x){return x.charAt(1).toUpperCase()});
+if(y=='X'){
+if(n)c=c.toLowerCase();
+else c=c.replace(/[уеыаоэяию]/,function(x){return x.toUpperCase();});
+}
+return '<u>'+c+'</u>';
+}else{
+return '<s>'+p+'</s>';
+}
+}else{
+return c;
+}
+
+});
+v=v.replace(/\n/g,'<br />');
+
+}else{
+
+var g=window.G,k=Object.keys(g),i,j=k.length;
+k.sort(function(a,b){if(a.length<b.length)return-1;if(a.length>b.length)return+1;return a<b;});
+
+for(i=0;i<j;i++)v+='<tr><td>'+(k[i].replace(/X/g,X).replace(/O/g,O))+' </td> <td> '+g[k[i]].length+'</td></tr>';
+v='<table>'+v+'</table>';
+
+}
+document.getElementById('out').innerHTML=v;
+
+}
+
+if(!window.G){
+alert('Словарь "ojegov.js" не загружен!');
+}else{
+F();
+}
+
+
+</script>
+
+</body></html>
+
+<!--
+
+rand_ojegov.js
+
+/*
+Извлечённый из словаря Ожегова список слов с ударениями.
+Словарь:
+ojegov.chm ( http://klimaleksus.narod.ru/Files/S/ojegov.chm )
+
+Скрипт для извлечения:
+
+1) Скачать .chm файл.
+2) Распаковать его (например через 7zip).
+3) Найти там файл abc.txt.
+4) Перейти на вот такой data-URI в нормальном браузере с JS-консолью:
+
+data:text/html,<textarea id=s wrap=off></textarea><textarea id=d wrap=off></textarea>
+
+5) Вставить в первое текстовое поле содержимое abc.txt
+6) Выполнить в консоли браузера следующий скрипт:
+(только раскомментированный)*/
+
+//   a=document.getElementById('s').value.split('\n');b=[];for(i=a.length;i--;){v=a[i].trim().replace(/,.*/g,'').replace(/\t/g,' ').replace(/^.*? .*? /g,'').replace(/<\/b.*/ig,'').replace(/\[|\(/g,'').replace(/<em>/ig,'(').replace(/<\/em>/ig,')').trim().toUpperCase().replace(/Ё/g,'Е');if(v.match(/[УЕЫАОЭЯИЮ]/)&&!v.match(/<|-| |(\(.*\()/)&&(!v.match(/\(/)||v.match(/\([УЕЫАОЭЯИЮ]\)/)))b.push(v.replace('(','`').replace(')',''));};r={};a=b;for(i=a.length;i--;){v=a[i];m=v.replace(/[^УЕЫАОЭЯИЮ`]/g,'').replace(/`[УЕЫАОЭЯИЮ]/g,'X').replace(/[УЕЫАОЭЯИЮ]/g,'O');if(m.length<2)m='X';if(!m.match(/O*X+O*/)||v.match(/[^`ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮ]/))continue;if(!r[m])r[m]=[];r[m].push(v);};document.getElementById('d').value=JSON.stringify(r);
+
+/*
+7) Взять JSON из второго поля.
+8) Приравнять window.G ему, как это сделано в данном скрипте ниже:
+*/
+
+window.G=
+
+
+
+
+
+-->
