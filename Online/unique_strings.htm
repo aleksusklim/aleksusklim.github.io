@@ -1,0 +1,123 @@
+<!doctype html><html><head><meta charset=utf-8><title>
+
+unique_strings.htm
+
+</title><style id=mystyle>
+
+textarea{width:90%;height:192px;}
+
+</style></head><body><div id=myform>
+
+<p>This script can combine two string lists to search unique entries.
+<p>You can use it for example to compare two logs to find strings from one that are not present in another.
+<p>The script will trim every line and ignore spaces and tabs from both ends of each string (you can pre-replace space or tab to some other character if you need that); spaces inside a string are preserved.
+<p>Lists are considered unsorted, the original order will be lost. Empty lines are ignored.
+<p>Paste one of your lists to "First list:" field below, and another to "Second list:".
+<p>Press "Search!" button. You will have to wait for a while if your lists are long (several megabytes); also close other tabs and memory-consuming applications in case of really huge lists! When your browser tells you that the page is not responding, choose "wait" (or just ignore the message).
+<p>Now, you can see your results. In "Shared lines:" there will be all strings that were found in both of your lists. Local duplicated are considered different, so each and every line is checked against another list.
+<p>In "Unique for first:" and "Unique for second:" you will see lines from your lists that are not found in another list. Essentially, these are your original strings but without "shared" part above.
+<p>In "Duplicates in first:" and "Duplicates in second:" you will get each your list sorted on local duplicates in itself (without using another list). You can see lone lines with tabs on both ends that holds a number (for example, "2") that indicates how many times all following strings are found. 
+
+<h2>.</h2>
+<h2>First list:</h2>
+<textarea wrap=off spellcheck=false id=input1></textarea>
+<h2>Second list:</h2>
+<textarea wrap=off spellcheck=false id=input2></textarea>
+<h2>.</h2>
+<button id=hit onclick="document.getElementById('hit').style.visibility='hidden';setTimeout(run,200);"><h1>Search!</h1></button>
+<h2>.</h2>
+<h2>Shared lines:</h2>
+<textarea wrap=off spellcheck=false id=output0></textarea>
+<h2>Unique for first:</h2>
+<textarea wrap=off spellcheck=false id=output1></textarea>
+<h2>Unique for second:</h2>
+<textarea wrap=off spellcheck=false id=output2></textarea>
+<h2>.</h2>
+<h2>Duplicates in first:</h2>
+<textarea wrap=off spellcheck=false id=dups1></textarea>
+<h2>Duplicates in second:</h2>
+<textarea wrap=off spellcheck=false id=dups2></textarea>
+<h2>.</h2>
+
+<script>
+"use strict";
+function run(){
+var sort=function(a,b){return a.localeCompare(b);},
+dups=function(a,b){return b[0]-a[0];},
+in1=document.getElementById('input1'),
+in2=document.getElementById('input2'),
+out0=document.getElementById('output0'),
+out1=document.getElementById('output1'),
+out2=document.getElementById('output2'),
+dup1=document.getElementById('dups1'),
+dup2=document.getElementById('dups2'),
+a1=in1.value.replace(/[\t ]*\n+[\t ]*/g,'\n').trim().split('\n').sort(sort),
+a2=in2.value.replace(/[\t ]*\n+[\t ]*/g,'\n').trim().split('\n').sort(sort),
+i1=0,
+i2=0,
+s1=a1.length,
+s2=a2.length,
+r0=[],
+r1=[],
+r2=[],
+d1=[],
+d2=[],
+t;
+while(i1<s1||i2<s2){
+if(i1==s1)t=1;
+else if(i2==s2)t=-1;
+else t=sort(a1[i1],a2[i2]);
+if(t<0){
+r1.push(a1[i1]);
+i1++;
+}else if(t>0){
+r2.push(a2[i2]);
+i2++;
+}else{
+r0.push(a1[i1]);
+i1++;
+i2++;
+}
+}
+out0.value=r0.join('\n')+'\n';
+out1.value=r1.join('\n')+'\n';
+out2.value=r2.join('\n')+'\n';
+for(i1=0;i1<s1;i1++){
+t=1;
+while(i1+1<s1)if(sort(a1[i1],a1[i1+1])==0){
+t++;
+i1++;
+}else break;
+d1.push([t,a1[i1]]);
+}
+for(i2=0;i2<s2;i2++){
+t=1;
+while(i2+1<s2)if(sort(a2[i2],a2[i2+1])==0){
+t++;
+i2++;
+}else break;
+d2.push([t,a2[i2]]);
+}
+d1.sort(dups);
+s1=d1.length;
+t=0;
+for(i1=0;i1<s1;i1++)if(d1[i1][0]!=t){
+t=d1[i1][0];
+d1[i1]='\n\t'+d1[i1][0]+'\t\n\n'+d1[i1][1];
+}else d1[i1]=d1[i1][1];
+d2.sort(dups);
+s2=d2.length;
+t=0;
+for(i2=0;i2<s2;i2++)if(d2[i2][0]!=t){
+t=d2[i2][0];
+d2[i2]='\n\t'+d2[i2][0]+'\t\n\n'+d2[i2][1];
+}else d2[i2]=d2[i2][1];
+dup1.value=d1.join('\n')+'\n';
+dup2.value=d2.join('\n')+'\n';
+document.getElementById('hit').style.visibility='visible';
+}
+</script>
+
+</div><script>setTimeout(function(h){h='<!doctype html><html><head><meta charset=utf-8><title>'+document.title+'</title><style id=mystyle>'+document.getElementById('mystyle').innerHTML+'</style></head><body><div id=myform>'+document.getElementById('myform').innerHTML+'</div></'+'body></'+'html>';document.open();document.write(h);document.close();if(window.stop)window.stop();if(document.execCommand)document.execCommand('Stop');});</script><xmp style='display:none;'></body></html>
+
+
