@@ -1,0 +1,145 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>stereogram-shaker v1</title>
+<style>
+html,body{
+  background: #7f7f7f;
+  margin:0;
+  padding:0;
+}
+img,div,center{
+  margin:0;
+  padding:0;
+}
+*{
+  box-sizing:border-box;
+}
+</style>
+</head>
+<body>
+<form onsubmit="window.myload();return false;">
+<input type="file" multiple="" accept="image/*" class="file" style="padding:8px;border:1px dashed black;text-align:center;width:90%;margin:auto;display:block;margin:4px;" />
+<input type="text" autofocus class="url" style="margin:8px;padding:2px;width:80%;margin-right:0;" onfocus="this.select();" /><input type="submit" value="LOAD"/><br />
+<center style="display:block;width:100%;position:relative;margin-top:64px;">
+<input type="range" min="0" max="512" style="position:absolute;top:-64px;height:64px;left:50%;transform:translateX(-50%);margin:0;padding:0" class="range"/>
+<img id="i1" style="position:absolute;top:0;left:50%;transform:translateX(-50%);z-index:0;"/><br />
+<img id="i2" style="position:absolute;top:0;left:50%;transform:translateX(-50%);z-index:1;"/>
+<img id="i0" style="visibility:hidden;"/>
+<input type="range" min="0" max="100" style="position:absolute;height:64px;bottom:-48px;left:50%;transform:translateX(-130%);margin:0;padding:0;" class="speed"/>
+<input type="range" min="0" max="100" style="position:absolute;height:64px;bottom:-48px;left:50%;transform:translateX(30%);margin:0;padding:0;" class="blend"/>
+</center>
+</form>
+<blockquote style="font:normal 16pt Arial;margin:48px;">
+== stereogram-shaker v1, растряси стереограмму! ==<br />
+<br />
+Выберите стереограмму: откройте файл, нажав в верхнее поле в рамке или перетащите в него; вставьте URL картинки с любого сайта в текстовое поле и нажмите LOAD; скопируйте картинку из буфера обмена и нажмите Ctrl+V прямо в текстовом поле.<br />
+<br />
+Верхняя полоска – смещение. Отодвиньте её вправо, чтобы найти точку фокуса. Если картинка слишком велика или мала – используйте масштаб своего браузера.<br />
+<br />
+Нижняя левая полоска – скорость тряски; нижняя правая полоска – смешивание копий изображения.<br />
+</blockquote>
+<script>
+(function(){
+  var url = document.getElementsByClassName('url')[0];
+  var file = document.getElementsByClassName('file')[0];
+  var range = document.getElementsByClassName('range')[0];
+  var speed = document.getElementsByClassName('speed')[0];
+  var blend = document.getElementsByClassName('blend')[0];
+  //alert(url.value);
+  var i1 = document.getElementById('i1');
+  var i2 = document.getElementById('i2');
+  var i0 = document.getElementById('i0');
+  i1.src = '';
+  i2.src = '';
+  i0.src = '';
+  var opa = 1;
+  var interval = 1000;
+  var inter = function(){
+    i1.style.opacity = (i1.style.zIndex = +!+i1.style.zIndex) ? opa : 1;
+    i2.style.opacity = (i2.style.zIndex = +!+i2.style.zIndex) ? opa : 1;
+    setTimeout(inter,interval);
+  };
+  setTimeout(inter,interval);
+  range.value = 0;
+  range.max = 0;
+  speed.min = 0;
+  speed.max = 1000;
+  speed.value = 500;
+  blend.min = 0;
+  blend.max = 100;
+  blend.value = 0;
+  blend.oninput = function(){
+    var per = blend.value/blend.max;
+    opa = 1-per/2;
+  };
+  range.oninput = function(){
+    var per = range.value/range.max/2;
+    var p1 = -50-per*100;
+    var p2 = -50+per*100;
+    i1.style.transform = 'translateX('+p1+'%)';
+    i2.style.transform = 'translateX('+p2+'%)';
+  };
+  speed.oninput = function(){
+    var per = Math.pow(speed.value/speed.max,0.25);
+    interval = 500-(500-25)*per;
+  };
+  range.oninput();
+  speed.oninput();
+  blend.oninput();
+  window.myload = function(what){
+    var addr = (typeof what)==='string' ? what : url.value.trim();
+    i1.src = '';
+    i2.src = '';
+    i0.src = '';
+    i0.onload = function(){
+      i0.onload = null;
+      var width = i1.width;
+      var w2 = width/2;
+      var val = range.max ? range.value*w2/range.max : 0;
+      range.max = w2 |0;
+      range.value = val ||0;
+      range.style.width = width+'px';
+      speed.style.width = (width/3|0)+'px';
+      blend.style.width = speed.style.width;
+      range.oninput();
+      speed.oninput();
+      blend.oninput();
+    }
+    i1.src = addr;
+    i2.src = addr;
+    i0.src = addr;
+  }
+  file.addEventListener('change',function(e){
+    for(var i=0,n=file.files.length; i<n; i++){
+      var reader = new FileReader();
+      reader.onload = function(event) {
+        window.myload(event.target.result);
+      };
+      reader.readAsDataURL(file.files[i]);
+      break;
+    }
+    file.value = '';
+  });
+  file.value = '';
+  url.onpaste = function (event) {
+    var items = (event.clipboardData  || event.originalEvent.clipboardData).items;
+    var blob = null;
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf("image") === 0) {
+        blob = items[i].getAsFile();
+      }
+    }
+    if (blob !== null) {
+      var reader = new FileReader();
+      reader.onload = function(event) {
+        window.myload(event.target.result);
+      };
+      reader.readAsDataURL(blob);
+    }
+  }
+})();
+</script>
+</body>
+</html>
